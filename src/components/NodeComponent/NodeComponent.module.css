@@ -1,0 +1,109 @@
+.nodeContainer {
+  position: absolute;
+  min-width: 150px;
+  padding: 16px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  cursor: grab;
+  transition: all 0.2s ease;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(51, 102, 204, 0.1);
+  user-select: none;
+}
+
+.nodeContainer:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.nodeContainer:active {
+  cursor: grabbing;
+}
+
+.nodeText {
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 4px;
+  word-break: break-word;
+  color: #1a1a1a;
+}
+
+.editInput {
+  width: 100%;
+  font-size: 16px;
+  line-height: 1.5;
+  padding: 8px;
+  border: 2px solid #3366CC;
+  border-radius: 6px;
+  outline: none;
+  background: rgba(51, 102, 204, 0.05);
+  transition: all 0.2s ease;
+}
+
+.editInput:focus {
+  box-shadow: 0 0 0 3px rgba(51, 102, 204, 0.2);
+}
+
+.nodeControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.nodeContainer:hover .nodeControls {
+  opacity: 1;
+}
+
+.addButton {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+}
+
+.addButton:hover {
+  background-color: #388E3C;
+  transform: scale(1.05);
+}
+
+.toggleButton {
+  background-color: #f0f0f0;
+  color: #666;
+  border: none;
+  border-radius: 6px;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggleButton:hover {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.root {
+  background-color: #f0f4ff;
+  border: 2px solid #3366CC;
+}
