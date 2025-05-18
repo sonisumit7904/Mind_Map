@@ -119,13 +119,14 @@ const MindMapCanvas: React.FC = () => {
     Object.values(state.nodes).forEach(node => {
       if (!shouldRenderNode(node)) return;
       
-      const parentPos = nodePositions[node.id];
-      if (!parentPos) return;
-      
-      node.childrenIds.forEach(childId => {
-        const childPos = nodePositions[childId];
-        if (!childPos || !shouldRenderNode(state.nodes[childId])) return;
-        
+      const parentNode = state.nodes[node.parentId || '']; // Get parent to access its connection style for the child
+      const childPos = nodePositions[node.id]; // Current node is the child in this context
+      if (!childPos) return;
+
+      if (node.parentId && parentNode) {
+        const parentPos = nodePositions[node.parentId];
+        if (!parentPos || !shouldRenderNode(parentNode)) return;
+
         const startX = parentPos.x + parentPos.width / 2;
         const startY = parentPos.y + parentPos.height;
         const endX = childPos.x + childPos.width / 2;
@@ -138,16 +139,28 @@ const MindMapCanvas: React.FC = () => {
         
         const path = `M ${startX} ${startY} Q ${control.x} ${control.y} ${endX} ${endY}`;
         
+        // Apply connection styles from the child node (which stores style for line from parent)
+        const connectionStyle = node.connectionStyle || {};
+        const strokeColor = connectionStyle.color || '#CBD5E1';
+        const strokeWidth = connectionStyle.thickness || 2;
+        let strokeDasharray = '';
+        if (connectionStyle.lineStyle === 'dashed') {
+          strokeDasharray = '5,5';
+        } else if (connectionStyle.lineStyle === 'dotted') {
+          strokeDasharray = '2,2';
+        }
+
         paths.push(
           <path
-            key={`${node.id}-${childId}`}
+            key={`${node.parentId}-${node.id}`}
             d={path}
-            stroke="#CBD5E1"
-            strokeWidth="2"
+            stroke={strokeColor}
+            strokeWidth={strokeWidth.toString()}
+            strokeDasharray={strokeDasharray}
             fill="none"
           />
         );
-      });
+      }
     });
     
     return paths;
@@ -195,7 +208,6 @@ const MindMapCanvas: React.FC = () => {
           node={node}
           onPositionUpdate={(element) => updateNodePosition(node.id, element)}
           onDrag={handleNodeDrag}
-          scale={transform.scale}
         />
       ));
   };

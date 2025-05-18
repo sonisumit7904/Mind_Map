@@ -8,6 +8,24 @@ export interface Node {
   childrenIds: string[];
   position: { x: number; y: number };
   isExpanded: boolean;
+  // New properties for Milestone 1
+  style?: {
+    color?: string;
+    backgroundColor?: string;
+    fontSize?: string; // e.g., '16px'
+    fontWeight?: string; // e.g., 'bold'
+    borderColor?: string;
+    borderWidth?: string; // e.g., '2px'
+    borderStyle?: 'solid' | 'dotted' | 'dashed';
+    borderRadius?: string; // For shape, e.g., '50%' for ellipse, '4px' for rectangle
+    backgroundImage?: string; // URL for background image
+  };
+  htmlContent?: string; // For rich text
+  connectionStyle?: { // Style of the line connecting this node to its parent
+    color?: string;
+    thickness?: number; // e.g., 2
+    lineStyle?: 'solid' | 'dashed' | 'dotted';
+  };
 }
 
 // Define the state shape
@@ -21,7 +39,11 @@ type MindMapAction =
   | { type: 'ADD_NODE'; parentId: string; text: string; position: { x: number; y: number } }
   | { type: 'UPDATE_NODE_TEXT'; nodeId: string; newText: string }
   | { type: 'TOGGLE_NODE_EXPANSION'; nodeId: string }
-  | { type: 'SET_NODE_POSITION'; nodeId: string; position: { x: number; y: number } };
+  | { type: 'SET_NODE_POSITION'; nodeId: string; position: { x: number; y: number } }
+  // New actions for Milestone 1
+  | { type: 'UPDATE_NODE_STYLE'; nodeId: string; style: Partial<Node['style']> }
+  | { type: 'UPDATE_NODE_HTML_CONTENT'; nodeId: string; htmlContent: string }
+  | { type: 'UPDATE_NODE_CONNECTION_STYLE'; nodeId: string; connectionStyle: Partial<Node['connectionStyle']> };
 
 // Generate unique IDs
 const generateId = (): string => Date.now().toString();
@@ -49,6 +71,23 @@ const initialState: MindMapState = {
       childrenIds: [],
       position: { x: 300, y: 200 },
       isExpanded: true,
+      // Default styles for Milestone 1 features
+      style: {
+        color: '#333333',
+        backgroundColor: '#FFFFFF',
+        fontSize: '16px',
+        fontWeight: 'normal',
+        borderColor: '#CCCCCC',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderRadius: '8px',
+      },
+      htmlContent: '', // Initially no rich text
+      connectionStyle: { // Default style for line from parent (none for root)
+        color: '#CBD5E1', // Default color from MindMapCanvas
+        thickness: 2,       // Default thickness from MindMapCanvas
+        lineStyle: 'solid',
+      },
     },
   },
 };
@@ -76,6 +115,17 @@ const mindMapReducer = (state: MindMapState, action: MindMapAction): MindMapStat
         childrenIds: [],
         position: action.position || childPosition,
         isExpanded: true,
+        // Inherit or set default styles for new nodes
+        style: {
+          ...(parentNode.style || initialState.nodes[rootId].style), // Inherit parent's style or default
+          backgroundColor: '#FFFFFF', // Default for new nodes
+        },
+        htmlContent: '',
+        connectionStyle: { // Default style for line connecting to this new node
+          color: '#CBD5E1',
+          thickness: 2,
+          lineStyle: 'solid',
+        },
       };
       
       return {
@@ -147,7 +197,51 @@ const mindMapReducer = (state: MindMapState, action: MindMapAction): MindMapStat
         },
       };
     }
-    
+    // Reducers for new actions
+    case 'UPDATE_NODE_STYLE': {
+      const node = state.nodes[action.nodeId];
+      if (!node) return state;
+      return {
+        ...state,
+        nodes: {
+          ...state.nodes,
+          [action.nodeId]: {
+            ...node,
+            style: { ...node.style, ...action.style },
+          },
+        },
+      };
+    }
+    case 'UPDATE_NODE_HTML_CONTENT': {
+      const node = state.nodes[action.nodeId];
+      if (!node) return state;
+      return {
+        ...state,
+        nodes: {
+          ...state.nodes,
+          [action.nodeId]: {
+            ...node,
+            htmlContent: action.htmlContent,
+            // Optionally clear simple text if htmlContent is set
+            // text: action.htmlContent ? '' : node.text, 
+          },
+        },
+      };
+    }
+    case 'UPDATE_NODE_CONNECTION_STYLE': {
+      const node = state.nodes[action.nodeId];
+      if (!node) return state;
+      return {
+        ...state,
+        nodes: {
+          ...state.nodes,
+          [action.nodeId]: {
+            ...node,
+            connectionStyle: { ...node.connectionStyle, ...action.connectionStyle },
+          },
+        },
+      };
+    }
     default:
       return state;
   }
