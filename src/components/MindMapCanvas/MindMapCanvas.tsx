@@ -18,7 +18,7 @@ interface Transform {
 }
 
 const MindMapCanvas: React.FC = () => {
-  const { state, dispatch } = useMindMap();
+  const { state } = useMindMap(); // Removed dispatch as it's no longer used directly here
   const [nodePositions, setNodePositions] = useState<Record<string, NodePosition>>({});
   const [transform, setTransform] = useState<Transform>({ x: 0, y: 0, scale: 1 });
   const [isDragging, setIsDragging] = useState(false);
@@ -187,16 +187,16 @@ const MindMapCanvas: React.FC = () => {
   };
 
   // Handle node drag
-  const handleNodeDrag = (nodeId: string, dx: number, dy: number) => {
-    dispatch({
-      type: 'SET_NODE_POSITION',
-      nodeId,
-      position: {
-        x: state.nodes[nodeId].position.x + dx / transform.scale,
-        y: state.nodes[nodeId].position.y + dy / transform.scale,
-      },
-    });
-  };
+  // const handleNodeDrag = (nodeId: string, dx: number, dy: number) => {
+  //   dispatch({
+  //     type: 'SET_NODE_POSITION',
+  //     nodeId,
+  //     position: {
+  //       x: state.nodes[nodeId].position.x + dx / transform.scale,
+  //       y: state.nodes[nodeId].position.y + dy / transform.scale,
+  //     },
+  //   });
+  // };
 
   // Render nodes
   const renderNodes = () => {
@@ -207,7 +207,7 @@ const MindMapCanvas: React.FC = () => {
           key={node.id}
           node={node}
           onPositionUpdate={(element) => updateNodePosition(node.id, element)}
-          onDrag={handleNodeDrag}
+          // onDrag={handleNodeDrag} // Removed as NodeComponent now dispatches its own drag updates
         />
       ));
   };

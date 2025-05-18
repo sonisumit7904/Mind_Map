@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useMindMap, Node } from '../../context/MindMapContext';
 import styles from './NodeComponent.module.css';
 import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
@@ -8,13 +8,11 @@ import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 interface NodeComponentProps {
   node: Node;
   onPositionUpdate: (element: HTMLElement) => void;
-  onDrag: (nodeId: string, dx: number, dy: number) => void;
 }
 
 const NodeComponent: React.FC<NodeComponentProps> = ({ 
   node, 
   onPositionUpdate, 
-  onDrag,
 }) => {
   const { dispatch } = useMindMap();
   const [isEditing, setIsEditing] = useState(false);
@@ -107,35 +105,52 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return; // Only handle left click
-    e.stopPropagation();
+    // Prevent canvas pan when clicking on a node
+    e.stopPropagation(); 
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
     
     const dx = e.clientX - dragStart.x;
     const dy = e.clientY - dragStart.y;
     
-    onDrag(node.id, dx, dy);
-    setDragStart({ x: e.clientX, y: e.clientY });
-  };
+    // Instead of onDrag, dispatch the delta update directly
+    // This keeps the logic consistent with how canvas panning might update positions
+    dispatch({
+      type: 'UPDATE_NODE_POSITION_BY_DELTA',
+      nodeId: node.id,
+      dx,
+      dy,
+      currentScale: 1, // Assuming node drags are not affected by canvas scale directly here
+                       // Or, pass the actual currentScale from MindMapCanvas if needed
+    });
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
+    // Update dragStart for the next movement delta calculation
+    setDragStart({ x: e.clientX, y: e.clientY });
+  }, [isDragging, dragStart, dispatch, node.id]); // Added dispatch and node.id to dependencies
+
+  const handleMouseUp = useCallback(() => {
+    if (isDragging) {
+      setIsDragging(false);
+    }
+  }, [isDragging]); // Added isDragging to dependencies
 
   useEffect(() => {
+    // Only add/remove listeners if isDragging state changes
     if (isDragging) {
+      // console.log('NodeComponent: Adding mousemove/mouseup listeners');
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
       return () => {
+        // console.log('NodeComponent: Removing mousemove/mouseup listeners');
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, handleMouseMove]);
+  }, [isDragging, handleMouseMove, handleMouseUp]); // handleMouseMove and handleMouseUp are now dependencies
 
   const hasChildren = node.childrenIds.length > 0;
   const isRoot = node.parentId === null;

@@ -40,6 +40,8 @@ type MindMapAction =
   | { type: 'UPDATE_NODE_TEXT'; nodeId: string; newText: string }
   | { type: 'TOGGLE_NODE_EXPANSION'; nodeId: string }
   | { type: 'SET_NODE_POSITION'; nodeId: string; position: { x: number; y: number } }
+  // New action for delta-based position updates
+  | { type: 'UPDATE_NODE_POSITION_BY_DELTA'; nodeId: string; dx: number; dy: number; currentScale: number }
   // New actions for Milestone 1
   | { type: 'UPDATE_NODE_STYLE'; nodeId: string; style: Partial<Node['style']> }
   | { type: 'UPDATE_NODE_HTML_CONTENT'; nodeId: string; htmlContent: string }
@@ -193,6 +195,24 @@ const mindMapReducer = (state: MindMapState, action: MindMapAction): MindMapStat
           [action.nodeId]: {
             ...node,
             position: action.position,
+          },
+        },
+      };
+    }
+    // Reducer for delta-based position updates
+    case 'UPDATE_NODE_POSITION_BY_DELTA': {
+      const node = state.nodes[action.nodeId];
+      if (!node) return state;
+      return {
+        ...state,
+        nodes: {
+          ...state.nodes,
+          [action.nodeId]: {
+            ...node,
+            position: {
+              x: node.position.x + action.dx / action.currentScale,
+              y: node.position.y + action.dy / action.currentScale,
+            },
           },
         },
       };
