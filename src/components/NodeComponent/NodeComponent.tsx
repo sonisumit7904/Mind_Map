@@ -8,19 +8,22 @@ import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 interface NodeComponentProps {
   node: Node;
   onPositionUpdate: (element: HTMLElement) => void;
+  currentScale: number; // Added currentScale
 }
 
-const NodeComponent: React.FC<NodeComponentProps> = ({ 
-  node, 
-  onPositionUpdate, 
+const NodeComponent: React.FC<NodeComponentProps> = ({
+  node,
+  onPositionUpdate,
+  currentScale, // Destructure currentScale
 }) => {
   const { dispatch } = useMindMap();
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(node.text);
   const [editHtmlContent, setEditHtmlContent] = useState(node.htmlContent || '');
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  // const [dragStart, setDragStart] = useState({ x: 0, y: 0 }); // Replaced with useRef
   const nodeRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef({ x: 0, y: 0 }); // Use a ref for drag start coordinates
 
   useEffect(() => {
     if (nodeRef.current) {
@@ -106,51 +109,56 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return; // Only handle left click
     // Prevent canvas pan when clicking on a node
-    e.stopPropagation(); 
+    e.stopPropagation();
     setIsDragging(true);
-    setDragStart({ x: e.clientX, y: e.clientY });
+    // setDragStart({ x: e.clientX, y: e.clientY }); // Store in ref instead
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
   };
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
-    
-    const dx = e.clientX - dragStart.x;
-    const dy = e.clientY - dragStart.y;
-    
-    // Instead of onDrag, dispatch the delta update directly
-    // This keeps the logic consistent with how canvas panning might update positions
+
+    // const dx = e.clientX - dragStart.x; // Use ref
+    // const dy = e.clientY - dragStart.y; // Use ref
+    const dx = e.clientX - dragStartRef.current.x;
+    const dy = e.clientY - dragStartRef.current.y;
+
     dispatch({
       type: 'UPDATE_NODE_POSITION_BY_DELTA',
       nodeId: node.id,
-      dx,
-      dy,
-      currentScale: 1, // Assuming node drags are not affected by canvas scale directly here
-                       // Or, pass the actual currentScale from MindMapCanvas if needed
+      dx: dx,
+      dy: dy,
+      currentScale: currentScale,
     });
+    // Update dragStart to the current mouse position for the next delta calculation
+    // setDragStart({ x: e.clientX, y: e.clientY }); // Update ref instead
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
 
-    // Update dragStart for the next movement delta calculation
-    setDragStart({ x: e.clientX, y: e.clientY });
-  }, [isDragging, dragStart, dispatch, node.id]); // Added dispatch and node.id to dependencies
+  }, [isDragging, dispatch, node.id, currentScale]); // Removed dragStart from dependencies
 
   const handleMouseUp = useCallback(() => {
     if (isDragging) {
       setIsDragging(false);
     }
-  }, [isDragging]); // Added isDragging to dependencies
+  }, [isDragging]); // Ensure isDragging is a dependency
 
   useEffect(() => {
-    // Only add/remove listeners if isDragging state changes
     if (isDragging) {
-      // console.log('NodeComponent: Adding mousemove/mouseup listeners');
+      // Add listeners when dragging starts
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        // console.log('NodeComponent: Removing mousemove/mouseup listeners');
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-      };
+    } else {
+      // Remove listeners when dragging stops
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
     }
-  }, [isDragging, handleMouseMove, handleMouseUp]); // handleMouseMove and handleMouseUp are now dependencies
+
+    // Cleanup function to remove listeners when the component unmounts or before re-running the effect
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   const hasChildren = node.childrenIds.length > 0;
   const isRoot = node.parentId === null;

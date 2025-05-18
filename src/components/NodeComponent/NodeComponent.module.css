@@ -1,109 +1,101 @@
 .nodeContainer {
   position: absolute;
-  min-width: 150px;
-  padding: 16px;
+  min-width: 160px; /* Slightly wider default */
+  padding: 12px 20px; /* More horizontal padding for elongated feel */
   background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 25px; /* Increased for pill/soft rectangle shape */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Existing shadow is good */
   cursor: grab;
-  transition: all 0.2s ease;
+  transition: all 0.2s ease-out; /* Using ease-out for smoother feel */
   z-index: 1;
   transform: translate(-50%, -50%);
-  border: 1px solid rgba(51, 102, 204, 0.1);
+  border: 1px solid #E0E0E0; /* Lighter default border */
   user-select: none;
 }
 
 .nodeContainer:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12); /* Slightly more pronounced shadow */
+  transform: translate(-50%, -50%) scale(1.03); /* Added scale effect, ensure translate is part of it */
+  border-color: #C0C0C0; /* Slightly darker border on hover */
 }
 
 .nodeContainer:active {
   cursor: grabbing;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Less shadow when active dragging */
 }
 
 .nodeText {
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 15px; /* Slightly smaller for a cleaner look */
+  line-height: 1.45; /* Adjusted for readability */
   margin: 0;
-  padding: 4px;
+  padding: 0; /* Remove padding if nodeContainer handles it */
   word-break: break-word;
-  color: #1a1a1a;
+  color: #333333; /* Darker text for better contrast */
+  text-align: center; /* Center text for pill shape */
 }
 
 .editInput {
   width: 100%;
-  font-size: 16px;
-  line-height: 1.5;
-  padding: 8px;
-  border: 2px solid #3366CC;
-  border-radius: 6px;
+  font-size: 15px;
+  line-height: 1.45;
+  padding: 8px 12px; /* Adjusted padding */
+  border: 1px solid #B0BEC5; /* Softer blue-grey border */
+  border-radius: 8px; /* Consistent rounded corners */
   outline: none;
-  background: rgba(51, 102, 204, 0.05);
+  background: #F8F9FA; /* Very light background */
   transition: all 0.2s ease;
 }
 
 .editInput:focus {
-  box-shadow: 0 0 0 3px rgba(51, 102, 204, 0.2);
+  border-color: #546E7A; /* Darker border on focus */
+  box-shadow: 0 0 0 3px rgba(84, 110, 122, 0.15); /* Softer focus shadow */
 }
 
 .nodeControls {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly; /* Evenly space controls */
   align-items: center;
-  margin-top: 12px;
+  margin-top: 10px; /* Reduced margin */
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease-in-out;
+  position: absolute; /* Position controls relative to node */
+  bottom: -15px; /* Position below the node */
+  left: 50%;
+  transform: translateX(-50%); /* Center the controls */
+  gap: 8px; /* Space between buttons */
 }
 
 .nodeContainer:hover .nodeControls {
   opacity: 1;
 }
 
-.addButton {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  width: 28px;
-  height: 28px;
-  font-size: 16px;
-  line-height: 1;
+.controlButton { /* Base style for control buttons */
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #555;
+  border: 1px solid #DDD;
+  border-radius: 50%; /* Circular buttons */
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+  transition: all 0.15s ease-out;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.addButton:hover {
-  background-color: #388E3C;
-  transform: scale(1.05);
-}
-
-.toggleButton {
-  background-color: #f0f0f0;
-  color: #666;
-  border: none;
-  border-radius: 6px;
-  padding: 0;
-  width: 28px;
-  height: 28px;
-  font-size: 16px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.toggleButton:hover {
-  background-color: #e0e0e0;
+.controlButton:hover {
+  background-color: #FFFFFF;
   color: #333;
+  border-color: #BBB;
+  transform: scale(1.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 
 .root {
-  background-color: #f0f4ff;
-  border: 2px solid #3366CC;
+  /* background-color: #E3F2FD; */ /* Lighter, more subtle root background */
+  /* border: 1px solid #90CAF9; */ /* Lighter root border */
+  /* For now, let root nodes be styled like others, branch colors will differentiate */
+  padding: 15px 25px; /* Slightly larger padding for root */
+  min-width: 180px;
 }

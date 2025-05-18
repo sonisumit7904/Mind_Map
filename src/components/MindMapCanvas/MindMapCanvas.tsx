@@ -18,7 +18,7 @@ interface Transform {
 }
 
 const MindMapCanvas: React.FC = () => {
-  const { state } = useMindMap(); // Removed dispatch as it's no longer used directly here
+  const { state, dispatch } = useMindMap(); // Added dispatch back
   const [nodePositions, setNodePositions] = useState<Record<string, NodePosition>>({});
   const [transform, setTransform] = useState<Transform>({ x: 0, y: 0, scale: 1 });
   const [isDragging, setIsDragging] = useState(false);
@@ -207,7 +207,7 @@ const MindMapCanvas: React.FC = () => {
           key={node.id}
           node={node}
           onPositionUpdate={(element) => updateNodePosition(node.id, element)}
-          // onDrag={handleNodeDrag} // Removed as NodeComponent now dispatches its own drag updates
+          currentScale={transform.scale} // Pass currentScale
         />
       ));
   };
